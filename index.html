@@ -21,6 +21,12 @@
 .adminEntryWrap{text-align:center;margin-top:12px}.adminEntry{border:0;background:transparent;color:#aaa096;font-size:.76rem;letter-spacing:.04em;cursor:pointer;padding:6px 10px;opacity:.72}.adminEntry:hover{opacity:1;color:var(--wood)}
 .loginModal{position:fixed;inset:0;background:#3b332b80;z-index:40;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}.loginModal.open{display:flex}.loginDialog{position:relative;width:min(420px,100%);background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:0 18px 55px #352a2040}.loginDialog h2{margin:0 0 4px;text-align:center;font:1.45rem Georgia,"Noto Sans TC",serif;color:var(--wood)}.loginDialog .loginSub{text-align:center;color:var(--muted);font-size:.88rem;margin:0 0 18px}.loginClose{position:absolute;right:12px;top:10px;border:0;background:transparent;color:var(--muted);font-size:1.45rem;cursor:pointer;line-height:1;padding:6px}.loginDialog .actions{justify-content:center}.loginDialog .btn{min-width:130px}
 #admin.adminSignedOut{display:none}
+
+/* 美髮作品批次上傳預覽 */
+.batchPreview{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-top:10px}
+.batchPreview:empty{display:none}.batchItem{position:relative;background:#faf7f0;border:1px solid var(--line);border-radius:12px;padding:7px;min-width:0}
+.batchItem img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:#eee8dd}.batchItem small{display:block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-size:.73rem;margin-top:5px}
+.batchRemove{position:absolute;top:2px;right:2px;min-width:29px;height:29px;border:0;border-radius:50%;background:#fffdf8;color:#8e3333;box-shadow:0 1px 6px #0003;cursor:pointer;font-weight:700}.batchCount{grid-column:1/-1;color:var(--muted);font-size:.88rem}
 </style></head><body>
 <header class="top"><div class="wrap nav"><a class="brand" href="#about">YOYO Home<small>yoyo家庭美髮</small></a><nav class="links"><a href="#about">關於 YOYO</a><a href="#certificates">專業資格</a><a href="#prices">價目表</a><a href="#gallery">美髮作品</a><a href="#leather">皮革手作</a><a href="#contact">聯絡我們</a></nav><a class="btn outline" href="#contact">預約方式</a></div></header>
 <main>
@@ -43,7 +49,7 @@
 <div id="adminContent" class="hidden"><div class="adminUserBar"><span id="adminUserText">已登入</span><button class="smallBtn" id="logoutBtn" type="button">登出</button></div>
 <h3 class="adminSectionTitle">① 自我介紹</h3><div class="field"><label for="aboutEditor">介紹內容（可直接修改）</label><textarea id="aboutEditor" rows="7" placeholder="輸入 YOYO 的自我介紹"></textarea></div><div class="actions"><button class="btn" id="saveAbout" type="button">儲存自我介紹</button></div><p id="aboutStatus" class="muted" aria-live="polite"></p>
 <h3 class="adminSectionTitle">② 專業證照與資格管理</h3><p class="muted" style="margin-top:0">可以新增、修改或刪除證照與專業資格。</p><div id="qualificationEditor" class="experienceEditor"></div><div class="actions"><button class="btn outline" id="addQualification" type="button">＋ 新增一項證照／資格</button><button class="btn" id="saveProfile" type="button">儲存證照資格</button></div><p id="profileStatus" class="muted" aria-live="polite"></p>
-<h3 class="adminSectionTitle">③ 美髮作品管理</h3><p class="muted" style="margin-top:0">從手機相簿選照片即可；上傳前會自動縮小照片。已上架作品可用 ← → 調整顯示順序。</p><div class="fields"><div class="field"><label for="workTitle">作品名稱</label><input id="workTitle" placeholder="例如：自然系短髮"></div><div class="field"><label for="workDesc">作品說明（可不填）</label><input id="workDesc" placeholder="例如：清爽好整理的層次剪裁"></div><div class="field" style="grid-column:1/-1"><label for="workPhoto">從手機相簿選擇照片</label><input id="workPhoto" type="file" accept="image/*"></div></div><div class="actions"><button class="btn" id="saveWork" type="button">＋ 新增作品</button><button class="btn outline" id="cancelEdit" type="button" style="display:none">取消編輯</button></div><p id="adminStatus" class="muted" aria-live="polite"></p><h3>已上架作品</h3><div id="adminList" class="adminGalleryList"></div>
+<h3 class="adminSectionTitle">③ 美髮作品管理</h3><p class="muted" style="margin-top:0">可一次選取多張照片，作品名稱及說明只需填一次；上傳前會自動縮小。已上架作品可用 ← → 調整顯示順序。</p><div class="fields"><div class="field"><label for="workTitle">作品名稱</label><input id="workTitle" placeholder="例如：自然系短髮"></div><div class="field"><label for="workDesc">作品說明（可不填）</label><input id="workDesc" placeholder="例如：清爽好整理的層次剪裁"></div><div class="field" style="grid-column:1/-1"><label for="workPhoto">從手機相簿選擇照片（可一次選多張）</label><input id="workPhoto" type="file" accept="image/*" multiple><span class="muted" style="font-size:.85rem">新增時，作品名稱與說明會套用到選取的全部照片；編輯舊作品時仍一次更換一張照片。</span><div id="workBatchPreview" class="batchPreview" aria-live="polite"></div></div></div><div class="actions"><button class="btn" id="saveWork" type="button">＋ 新增作品</button><button class="btn outline" id="cancelEdit" type="button" style="display:none">取消編輯</button></div><p id="adminStatus" class="muted" aria-live="polite"></p><h3>已上架作品</h3><div id="adminList" class="adminGalleryList"></div>
 <h3 class="adminSectionTitle">④ 皮革手作管理</h3><p class="muted" style="margin-top:0">操作方式和美髮作品一樣，可以直接用手機新增、修改、刪除，也可用 ← → 調整顯示順序。</p><div class="fields"><div class="field"><label for="leatherTitle">作品名稱</label><input id="leatherTitle" placeholder="例如：手工皮革短夾"></div><div class="field"><label for="leatherDesc">作品說明（可不填）</label><input id="leatherDesc" placeholder="例如：手工縫製，可詢問款式"></div><div class="field" style="grid-column:1/-1"><label for="leatherPhoto">從手機相簿選擇照片</label><input id="leatherPhoto" type="file" accept="image/*"></div></div><div class="actions"><button class="btn" id="saveLeather" type="button">＋ 新增皮革作品</button><button class="btn outline" id="cancelLeatherEdit" type="button" style="display:none">取消編輯</button></div><p id="leatherStatus" class="muted" aria-live="polite"></p><h3>已上架皮革作品</h3><div id="leatherAdminList" class="adminGalleryList"></div>
 </div></div></div></section>
 </main><footer>YOYO Home｜yoyo家庭美髮<br>溫馨家庭美髮，歡迎提前聯絡預約。<div class="adminEntryWrap"><button id="adminEntry" class="adminEntry" type="button" aria-label="管理登入">♢ 管理登入</button></div></footer>
@@ -76,35 +82,82 @@ document.getElementById('logoutBtn').onclick=async()=>{await sb.auth.signOut();a
 document.getElementById('addQualification').onclick=()=>{profile.qualifications.push({id:null,title:'',sort_order:profile.qualifications.length+1});renderQualificationEditor()};
 document.getElementById('saveAbout').onclick=async()=>{const st=document.getElementById('aboutStatus');st.textContent='儲存中…';const value=document.getElementById('aboutEditor').value.trim();const {error}=await sb.from('site_settings').upsert({setting_key:'about_yoyo',setting_value:value,updated_at:new Date().toISOString()},{onConflict:'setting_key'});if(error)st.textContent='儲存失敗：'+error.message;else{profile.about=value;renderProfile();st.textContent='自我介紹已同步到雲端 ♡'}};
 document.getElementById('saveProfile').onclick=async()=>{const st=document.getElementById('profileStatus');st.textContent='儲存中…';const titles=[...document.querySelectorAll('[data-qual-index]')].map(x=>x.value.trim()).filter(Boolean);const del=await sb.from('qualifications').delete().gte('id',0);if(del.error){st.textContent='儲存失敗：'+del.error.message;return}if(titles.length){const ins=await sb.from('qualifications').insert(titles.map((title,i)=>({title,sort_order:i+1})));if(ins.error){st.textContent='儲存失敗：'+ins.error.message;return}}st.textContent='證照與資格已同步到雲端 ♡';await loadCloudData()};
-function clearForm(){editingId=null;workTitle.value='';workDesc.value='';workPhoto.value='';saveWork.textContent='＋ 新增作品';cancelEdit.style.display='none'}
-
-// 作品新增／修改按鈕：明確綁定事件，避免不同瀏覽器對 id 全域變數支援差異
+// 同一批相片共用作品名稱、說明；本機預覽不會上傳到雲端
+let pendingWorkFiles=[];
+const workFileInput=document.getElementById('workPhoto');
+const workBatchPreview=document.getElementById('workBatchPreview');
 const saveWorkBtn=document.getElementById('saveWork');
 const cancelEditBtn=document.getElementById('cancelEdit');
+function renderWorkBatchPreview(){
+  workBatchPreview.replaceChildren();
+  if(!pendingWorkFiles.length)return;
+  const count=document.createElement('div');count.className='batchCount';
+  count.textContent=editingId?'編輯模式：只會使用第一張選取的照片':`已選 ${pendingWorkFiles.length} 張照片，按「全部上傳」後會各自新增為獨立作品。`;
+  workBatchPreview.append(count);
+  pendingWorkFiles.forEach((file,index)=>{
+    const box=document.createElement('div');box.className='batchItem';
+    const img=document.createElement('img');const url=URL.createObjectURL(file);img.src=url;img.alt='第 '+(index+1)+' 張預覽';img.onload=()=>URL.revokeObjectURL(url);img.onerror=()=>URL.revokeObjectURL(url);
+    const label=document.createElement('small');label.textContent=file.name;
+    const remove=document.createElement('button');remove.type='button';remove.className='batchRemove';remove.textContent='×';remove.setAttribute('aria-label','移除 '+file.name);
+    remove.onclick=()=>{pendingWorkFiles.splice(index,1);workFileInput.value='';renderWorkBatchPreview();};
+    box.append(img,label,remove);workBatchPreview.append(box);
+  });
+}
+workFileInput.addEventListener('change',()=>{
+  const chosen=[...workFileInput.files].filter(f=>f.type.startsWith('image/'));
+  pendingWorkFiles=editingId?chosen.slice(0,1):chosen;
+  renderWorkBatchPreview();
+});
+function clearForm(){editingId=null;pendingWorkFiles=[];workBatchPreview.replaceChildren();document.getElementById('workTitle').value='';document.getElementById('workDesc').value='';workFileInput.value='';saveWorkBtn.textContent='＋ 全部上傳作品';cancelEditBtn.style.display='none'}
+saveWorkBtn.textContent='＋ 全部上傳作品';
 saveWorkBtn.addEventListener('click',async()=>{
   const st=document.getElementById('adminStatus');
   const title=document.getElementById('workTitle').value.trim();
   const description=document.getElementById('workDesc').value.trim();
-  const file=document.getElementById('workPhoto').files[0];
-  if(!editingId&&!file){st.textContent='請先選擇一張作品照片 ♡';return}
-  saveWorkBtn.disabled=true; st.textContent=editingId?'儲存修改中…':'作品上傳中…';
+  const files=[...pendingWorkFiles];
+  if(!editingId&&!files.length){st.textContent='請先選擇至少一張作品照片 ♡';return}
+  saveWorkBtn.disabled=true;workFileInput.disabled=true;
+  let success=0;const failures=[];
   try{
-    let imageUrl=null,oldUrl=null;
-    if(editingId){const old=works.find(w=>w.id===editingId);oldUrl=old?.image_url||null;imageUrl=oldUrl}
-    if(file){const uploaded=await uploadPhoto(file,'hair');imageUrl=uploaded.url}
-    let res;
-    if(editingId) res=await sb.from('hair_works').update({title,description,image_url:imageUrl}).eq('id',editingId);
-    else res=await sb.from('hair_works').insert({title,description,image_url:imageUrl,sort_order:0});
-    if(res.error)throw res.error;
-    if(file&&oldUrl&&oldUrl!==imageUrl)await removePhoto(oldUrl);
-    const wasEditing=!!editingId;clearForm();st.textContent=wasEditing?'作品修改完成 ♡':'作品新增完成 ♡';
-    await loadCloudData();
+    if(editingId){
+      st.textContent='儲存修改中…';
+      const old=works.find(w=>w.id===editingId);
+      if(!old)throw Error('找不到原本的作品，請重新整理網頁');
+      const oldUrl=old.image_url;
+      let newUrl=oldUrl;
+      if(files.length){newUrl=(await uploadPhoto(files[0],'hair')).url}
+      const res=await sb.from('hair_works').update({title,description,image_url:newUrl}).eq('id',editingId);
+      if(res.error){if(newUrl!==oldUrl)await removePhoto(newUrl).catch(()=>{});throw res.error}
+      if(newUrl!==oldUrl)await removePhoto(oldUrl).catch(()=>{});
+      clearForm();st.textContent='作品修改完成 ♡';await loadCloudData();
+    }else{
+      for(let i=0;i<files.length;i++){
+        const file=files[i];st.textContent=`上傳中 ${i+1} / ${files.length} 張（已成功 ${success} 張）…`;
+        let url=null;
+        try{
+          const uploaded=await uploadPhoto(file,'hair');url=uploaded.url;
+          const res=await sb.from('hair_works').insert({title,description,image_url:url,sort_order:0});
+          if(res.error)throw res.error;
+          success++;
+        }catch(err){
+          if(url)await removePhoto(url).catch(()=>{});
+          failures.push({file,error:err?.message||String(err)});
+        }
+      }
+      if(success)await loadCloudData();
+      if(failures.length){
+        pendingWorkFiles=failures.map(x=>x.file);workFileInput.value='';renderWorkBatchPreview();
+        st.textContent=`成功上傳 ${success} 張，失敗 ${failures.length} 張。失敗的照片已保留在預覽，按「全部上傳作品」可重試。第一筆錯誤：${failures[0].error}`;
+      }else{
+        clearForm();st.textContent=`完成！成功新增 ${success} 張作品 ♡`;
+      }
+    }
   }catch(err){st.textContent='儲存失敗：'+(err?.message||err)}
-  finally{saveWorkBtn.disabled=false}
+  finally{saveWorkBtn.disabled=false;workFileInput.disabled=false}
 });
 cancelEditBtn.addEventListener('click',()=>{clearForm();document.getElementById('adminStatus').textContent='已取消編輯。'});
 async function moveWork(i,dir){const j=i+dir;if(j<0||j>=works.length)return;const reordered=[...works];[reordered[i],reordered[j]]=[reordered[j],reordered[i]];adminStatus.textContent='調整順序中…';const results=await Promise.all(reordered.map((w,index)=>sb.from('hair_works').update({sort_order:index+1}).eq('id',w.id)));const bad=results.find(r=>r.error);if(bad){adminStatus.textContent='順序調整失敗：'+bad.error.message;return}works=reordered;renderWorks();adminStatus.textContent='作品順序已更新 ♡'}
-function editWork(i){const w=works[i];editingId=w.id;workTitle.value=w.title||'';workDesc.value=w.description||'';workPhoto.value='';saveWork.textContent='儲存修改';cancelEdit.style.display='inline-flex';adminStatus.textContent='正在編輯；不選新照片就會保留原照片。';document.getElementById('workTitle').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>workTitle.focus({preventScroll:true}),350)}
+function editWork(i){const w=works[i];pendingWorkFiles=[];workBatchPreview.replaceChildren();editingId=w.id;workTitle.value=w.title||'';workDesc.value=w.description||'';workPhoto.value='';saveWork.textContent='儲存修改';cancelEdit.style.display='inline-flex';adminStatus.textContent='正在編輯；不選新照片就會保留原照片。';document.getElementById('workTitle').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>workTitle.focus({preventScroll:true}),350)}
 async function deleteWork(i){const w=works[i];if(!confirm('確定要刪除這張作品嗎？'))return;const {error}=await sb.from('hair_works').delete().eq('id',w.id);if(error){adminStatus.textContent='刪除失敗：'+error.message;return}await removePhoto(w.image_url);adminStatus.textContent='作品已刪除。';await loadCloudData()}
 function clearLeatherForm(){leatherEditingId=null;leatherTitle.value='';leatherDesc.value='';leatherPhoto.value='';saveLeather.textContent='＋ 新增皮革作品';cancelLeatherEdit.style.display='none'}
 
